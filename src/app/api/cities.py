@@ -32,3 +32,34 @@ async def read_city(id: int):
 @router.get("/", response_model=List[CityDB])
 async def read_all_cities():
     return await crud.get_all()
+
+
+@router.put("/{id}/", response_model=CityDB)
+async def update_city(id: int, payload: CitySchema):
+    note = await crud.get(id)
+    if not note:
+        raise HTTPException(status_code=404, detail="City not found")
+
+    city_id = await crud.put(id, payload)
+
+    response_object = {
+        "id": city_id,
+        "codice_comune": payload.codice_comune,
+        "distretto": payload.distretto,
+        "denominazione_comune": payload.denominazione_comune,
+        "lat": payload.lat,
+        "long": payload.long
+    }
+    return response_object
+
+
+@router.delete("/{id}/", response_model=CityDB)
+async def delete_city(id: int):
+    city = await crud.get(id)
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found")
+
+    await crud.delete(id)
+
+    return city
+
