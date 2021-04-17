@@ -37,6 +37,24 @@ def test_create_city_invalid_json(test_app):
     response = test_app.post("/cities/", data=json.dumps({"codice_comune": 222}))
     assert response.status_code == 422
 
+    response = test_app.post("/cities/", data=json.dumps({
+        "codice_comune": 999,
+        "distretto": 1234,
+        "denominazione_comune": "v",
+        "lat": 154.5965,
+        "long": 11.9874
+    }))
+    assert response.status_code == 422
+
+    response = test_app.post("/cities/", data=json.dumps({
+        "codice_comune": 999,
+        "distretto": 1234,
+        "denominazione_comune": "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv",
+        "lat": 154.5965,
+        "long": 11.9874
+    }))
+    assert response.status_code == 422
+
 
 def test_read_city(test_app, monkeypatch):
     test_data = {
@@ -136,6 +154,20 @@ def test_update_city(test_app, monkeypatch):
             "lat": 154.5965,
             "long": 11.9874
         }, 404],
+        [1, {
+            "codice_comune": 999,
+            "distretto": 1234,
+            "denominazione_comune": "v",
+            "lat": 154.5965,
+            "long": 11.9874
+        }, 422],
+        [1, {
+            "codice_comune": 999,
+            "distretto": 1234,
+            "denominazione_comune": "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv",
+            "lat": 154.5965,
+            "long": 11.9874
+        }, 422],
     ],
 )
 def test_update_city_invalid(test_app, monkeypatch, id, payload, status_code):
