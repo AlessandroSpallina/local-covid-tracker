@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from app.api import crud
+from app.api.repositories import city_repository as crud
 
 
 def test_create_city(test_app, monkeypatch):

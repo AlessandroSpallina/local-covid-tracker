@@ -1,6 +1,8 @@
 from app.api.models import CitySchema
 from app.db import cities, database
 
+from asyncpg import exceptions
+
 
 async def post(payload: CitySchema):
     query = cities.insert().values(
@@ -10,7 +12,12 @@ async def post(payload: CitySchema):
         lat=payload.lat,
         long=payload.long,
     )
-    return await database.execute(query=query)
+
+    # TODO: find a better solution to throw exception to controllers
+    try:
+        return await database.execute(query=query)
+    except exceptions.UniqueViolationError:
+        return None
 
 
 async def get(id: int):
@@ -37,7 +44,10 @@ async def put(id: int, payload: CitySchema):
         )
         .returning(cities.c.id)
     )
-    return await database.execute(query=query)
+    try:
+        return await database.execute(query=query)
+    except exceptions.UniqueViolationError:
+        return None
 
 
 async def delete(id: int):

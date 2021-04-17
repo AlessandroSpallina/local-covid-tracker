@@ -1,4 +1,4 @@
-from app.api import crud
+from app.api.repositories import city_repository as crud
 from app.api.models import CityDB, CitySchema
 from fastapi import APIRouter, HTTPException
 from typing import List
@@ -9,6 +9,9 @@ router = APIRouter()
 @router.post("/", response_model=CityDB, status_code=201)
 async def create_city(payload: CitySchema):
     city_id = await crud.post(payload)
+
+    if not city_id:
+        raise HTTPException(status_code=422, detail="Unable to create the city")
 
     response_object = {
         "id": city_id,
@@ -41,6 +44,9 @@ async def update_city(id: int, payload: CitySchema):
         raise HTTPException(status_code=404, detail="City not found")
 
     city_id = await crud.put(id, payload)
+
+    if not city_id:
+        raise HTTPException(status_code=422, detail="Unable to update the city")
 
     response_object = {
         "id": city_id,
