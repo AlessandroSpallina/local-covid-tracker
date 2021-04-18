@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/", response_model=CityDB, status_code=201)
 async def create_city(payload: CitySchema):
+    payload.denominazione_comune = payload.denominazione_comune.lower()
     city_id = await crud.post(payload)
 
     if not city_id:
@@ -39,10 +40,11 @@ async def read_all_cities():
 
 @router.put("/{id}/", response_model=CityDB)
 async def update_city(id: int, payload: CitySchema):
-    note = await crud.get(id)
-    if not note:
+    city = await crud.get(id)
+    if not city:
         raise HTTPException(status_code=404, detail="City not found")
 
+    payload.denominazione_comune = payload.denominazione_comune.lower()
     city_id = await crud.put(id, payload)
 
     if not city_id:
