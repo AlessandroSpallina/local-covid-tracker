@@ -3,7 +3,7 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 
 
 class Cities(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.UUIDField(pk=True)
     codice_comune = fields.IntField(unique=True)
     distretto = fields.IntField()
     denominazione_comune = fields.CharField(unique=True, max_length=50)
