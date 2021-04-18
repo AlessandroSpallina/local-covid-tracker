@@ -1,22 +1,20 @@
+import os
 from fastapi import FastAPI
+from tortoise.contrib.fastapi import register_tortoise
 
-from app.api import ping, cities
-from app.db import engine, metadata, database
+import app.cities as cities
+import app.ping as ping
 
-metadata.create_all(engine)
 
 app = FastAPI()
 
-
-@app.on_event("startup")
-async def startup():
-    await database.connect()
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await database.disconnect()
-
-
 app.include_router(ping.router)
 app.include_router(cities.router, prefix="/cities", tags=["cities"])
+
+register_tortoise(
+    app,
+    db_url=os.getenv("DATABASE_URL"),
+    modules={"models": ["app.models"]},
+    generate_schemas=True,
+    add_exception_handlers=True,
+)
