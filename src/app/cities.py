@@ -4,7 +4,10 @@ from typing import List
 from pydantic import BaseModel
 from uuid import UUID
 
-from app.models import City_Pydantic, CityIn_Pydantic, Cities
+from app.models import (
+    City_Pydantic, CityIn_Pydantic, Cities,
+    TrackedDay_Pydantic, TrackedDayIn_Pydantic, TrackedDays
+)
 
 router = APIRouter()
 
@@ -43,3 +46,30 @@ async def delete_city(city_id: UUID):
         raise HTTPException(status_code=404, detail=f"City {city_id} not found")
 
     return Status(message=f"Deleted city {city_id}")
+
+
+# --------- Tracked Days ----------
+
+@router.post("/{city_id}/days/", response_model=TrackedDay_Pydantic, status_code=201)
+async def create_tracked_day(city_id: UUID, day: TrackedDayIn_Pydantic):
+    # operations on data
+    day_obj = await TrackedDays.create(**day.dict(exclude_unset=True), city_id=city_id)
+    return await TrackedDay_Pydantic.from_tortoise_orm(day_obj)
+
+
+@router.get("/{city_id}/days/{day_id}/", response_model=TrackedDay_Pydantic, responses={404: {"model": HTTPNotFoundError}})
+async def read_tracked_day(city_id: UUID, day_id: UUID):
+    return await TrackedDay_Pydantic.from_queryset_single(TrackedDays.get(id=day_id, city_id=city_id))
+
+
+@router.get("/{city_id}/days/", response_model=List[TrackedDay_Pydantic])
+async def read_all_tracked_days(city_id: UUID):
+    return await TrackedDay_Pydantic.from_queryset(TrackedDays.filter(city_id=city_id).all())
+
+
+# @router.put("/{city_id}/days/", response_model=TrackedDay_Pydantic, responses={404: {"model": HTTPNotFoundError}})
+# async def update_tracked_day(city_id: UUID, day: TrackedDayIn_Pydantic):
+#     # operations on data
+#     await TrackedDays.filter(city_idid=city_id).update(**)
+
+
