@@ -45,7 +45,7 @@ async def delete_city(city_id: UUID):
     if not deleted_count:
         raise HTTPException(status_code=404, detail=f"City {city_id} not found")
 
-    return Status(message=f"Deleted city {city_id}")
+    return Status(message=f"Deleted City {city_id}")
 
 
 # --------- Tracked Days ----------
@@ -67,9 +67,19 @@ async def read_all_tracked_days(city_id: UUID):
     return await TrackedDay_Pydantic.from_queryset(TrackedDays.filter(city_id=city_id).all())
 
 
-# @router.put("/{city_id}/days/", response_model=TrackedDay_Pydantic, responses={404: {"model": HTTPNotFoundError}})
-# async def update_tracked_day(city_id: UUID, day: TrackedDayIn_Pydantic):
-#     # operations on data
-#     await TrackedDays.filter(city_idid=city_id).update(**)
+@router.put("/{city_id}/days/{day_id}/", response_model=TrackedDay_Pydantic, responses={404: {"model": HTTPNotFoundError}})
+async def update_tracked_day(city_id: UUID, day_id: UUID, day: TrackedDayIn_Pydantic):
+    # operations on data
+    await TrackedDays.filter(id=day_id, city_id=city_id).update(**day.dict(exclude_unset=True))
+    return await TrackedDay_Pydantic.from_queryset_single(TrackedDays.get(id=day_id, city_id=city_id))
+
+
+@router.delete("/{city_id}/days/{day_id}/", response_model=Status,  responses={404: {"model": HTTPNotFoundError}})
+async def delete_tracked_day(city_id: UUID, day_id: UUID):
+    deleted_count = await TrackedDays.filter(id=day_id, city_id=city_id).delete()
+    if not deleted_count:
+        raise HTTPException(status_code=404, detail=f"TrackedDay {day_id} not found")
+
+    return Status(message=f"Deleted TrackedDay {day_id}")
 
 
