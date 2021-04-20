@@ -12,6 +12,10 @@ from app.models import (
 router = APIRouter()
 
 
+class Status(BaseModel):
+    message: str
+
+
 @router.post("/", response_model=City_Pydantic, status_code=201)
 async def create_city(city: CityIn_Pydantic):
     city.denominazione_comune = city.denominazione_comune.lower()
@@ -35,9 +39,6 @@ async def update_city(city_id: UUID, city: CityIn_Pydantic):
     await Cities.filter(id=city_id).update(**city.dict(exclude_unset=True))
     return await City_Pydantic.from_queryset_single(Cities.get(id=city_id))
 
-
-class Status(BaseModel):
-    message: str
 
 @router.delete("/{city_id}/", response_model=Status, responses={404: {"model": HTTPNotFoundError}})
 async def delete_city(city_id: UUID):
